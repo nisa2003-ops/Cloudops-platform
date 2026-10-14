@@ -1,0 +1,29 @@
+groups:
+  - name: cloudops_alerts
+    rules:
+      - alert: ServiceDown
+        expr: up{job="cloudops-fastapi"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "CloudOps service instance is unreachable"
+          description: "Prometheus failed to scrape CloudOps FastAPI app for over 30 seconds."
+
+      - alert: HighHttpErrorRate
+        expr: sum(rate(http_requests_total{status_code=~"5.."}[1m])) / sum(rate(http_requests_total[1m])) * 100 > 5
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "High HTTP 5xx error rate detected"
+          description: "HTTP 5xx error rate exceeds 5% of total requests over the last 1 minute."
+
+      - alert: HighRequestLatencyP95
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le)) > 0.5
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "P95 request latency exceeds 500ms"
+          description: "95th percentile HTTP latency has exceeded 500ms for over 30 seconds."
