@@ -1,9 +1,19 @@
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+rule_files:
+  - "alert_rules.yml"
 
 scrape_configs:
-  - job_name: networkops-api
-    metrics_path: /metrics
+  - job_name: "cloudops-fastapi"
+    metrics_path: "/metrics"
     static_configs:
-      - targets: [host.docker.internal:8080]
+      - targets: ["app:8000"]
+        labels:
+          service: "cloudops"
+          environment: "production"
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
