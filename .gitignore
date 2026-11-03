@@ -13,6 +13,8 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+*.xml
+test-results.xml
 
 # Environment variables & secrets
 .env
