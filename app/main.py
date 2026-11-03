@@ -13,7 +13,7 @@ from app.config import get_settings
 from app.routes.api import router as api_router
 from app.services.reliability import reliability_service
 
-# Structured JSON Logging
+# Configure JSON-style structured logging
 logging.basicConfig(
     level=logging.INFO,
     format='{"time":"%(asctime)s", "level":"%(levelname)s", "service":"cloudops", "message":"%(message)s"}',
@@ -22,7 +22,7 @@ logger = logging.getLogger("cloudops")
 
 settings = get_settings()
 
-# --- Prometheus Metrics (RED Method) ---
+# --- Prometheus Metrics Instrumentation (RED Method) ---
 REQUEST_COUNT = Counter(
     "http_requests_total",
     "Total HTTP request count",
@@ -58,10 +58,11 @@ async def metrics_and_logging_middleware(request: Request, call_next):
     start_time = time.perf_counter()
     endpoint = request.url.path
 
-    # Avoid recursing on Prometheus scrape calls
+    # Do not track /metrics inside Prometheus metrics to avoid skewing observations
     if endpoint == "/metrics":
         return await call_next(request)
 
+    # Check for artificial latency injection from chaos testing service
     await reliability_service.apply_simulated_latency()
 
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -94,4 +95,5 @@ async def get_metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+# Include API routes
 app.include_router(api_router)
