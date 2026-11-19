@@ -1,0 +1,9 @@
+aws_region            = "us-east-1"
+environment           = "dev"
+vpc_cidr              = "10.0.0.0/16"
+public_subnet_cidr    = "10.0.1.0/24"
+availability_zone     = "us-east-1a"
+allowed_ingress_cidrs = ["0.0.0.0/0"] # Or replace with your local IP like ["YOUR_IP/32"]
+instance_type         = "t3.micro"
+enable_github_oidc    = true
+github_repository     = "nisa03-cloud/Cloudops" # Replace with your GitHub username/repo
