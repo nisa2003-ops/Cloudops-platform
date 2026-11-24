@@ -48,10 +48,12 @@ jobs:
           echo "image_uri=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: "Deploy to EC2 via AWS SSM Run Command"
-        if: steps.build-image.outcome == 'success' && secrets.EC2_INSTANCE_ID != ''
+        env:
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+        if: steps.build-image.outcome == 'success' && env.EC2_INSTANCE_ID != ''
         run: |
           aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --instance-ids "$EC2_INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
             --comment "Deploying CloudOps Image tag ${{ github.sha }}" \
             --parameters 'commands=[
